@@ -438,6 +438,41 @@ class BasicTextTests(mango.UserDocsTextTests):
         assert docs[0]["user_id"] == 2
         assert docs[1]["user_id"] == 10
 
+    def test_empty(self):
+        resp = self.db.find({}, explain=True)
+        self.assertEqual(resp["index"]["type"], "special")
+
+    def test_empty_array_or(self):
+        resp = self.db.find({"$or": []}, explain=True)
+        self.assertEqual(resp["index"]["type"], "text")
+        docs = self.db.find({"$or": []})
+        assert len(docs) == 0
+
+    def test_empty_array_or_with_age(self):
+        resp = self.db.find({"age": 22, "$or": []}, explain=True)
+        self.assertEqual(resp["index"]["type"], "text")
+        docs = self.db.find({"age": 22, "$or": []})
+        assert len(docs) == 1
+
+    def test_empty_array_and_with_age(self):
+        resp = self.db.find({"age": 22, "$and": [{"b": {"$all":[]}}]},
+            explain=True)
+        self.assertEqual(resp["index"]["type"], "text")
+        docs = self.db.find({"age": 22, "$and": []})
+        assert len(docs) == 1
+
+    def test_empty_arrays_complex(self):
+        resp = self.db.find({"$or": [], "a": {"$in" : []}}, explain=True)
+        self.assertEqual(resp["index"]["type"], "text")
+        docs = self.db.find({"$or": [], "a": {"$in" : []}})
+        assert len(docs) == 0
+
+    def test_empty_nin(self):
+        resp = self.db.find({"favorites": {"$nin" : []}}, explain=True)
+        self.assertEqual(resp["index"]["type"], "text")
+        docs = self.db.find({"favorites": {"$nin" : []}})
+        assert len(docs) == len(user_docs.DOCS)
+
     # test lucene syntax in $text
 
 @unittest.skipUnless(mango.has_text_service(), "requires text service")

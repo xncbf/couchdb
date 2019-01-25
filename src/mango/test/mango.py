@@ -290,6 +290,7 @@ class DbPerClass(unittest.TestCase):
 
 
 class UserDocsTests(DbPerClass):
+    INDEX_TYPE = "json"
 
     @classmethod
     def setUpClass(klass):
@@ -298,18 +299,19 @@ class UserDocsTests(DbPerClass):
 
 
 class UserDocsTestsNoIndexes(DbPerClass):
+    INDEX_TYPE = "special"
 
     @classmethod
     def setUpClass(klass):
         super(UserDocsTestsNoIndexes, klass).setUpClass()
         user_docs.setup(
                     klass.db,
-                    index_type="_all_docs"
+                    index_type=klass.INDEX_TYPE
             )
 
 
 class UserDocsTextTests(DbPerClass):
-
+    INDEX_TYPE = "text"
     DEFAULT_FIELD = None
     FIELDS = None
 
@@ -319,7 +321,7 @@ class UserDocsTextTests(DbPerClass):
         if has_text_service():
             user_docs.setup(
                     klass.db,
-                    index_type="text",
+                    index_type=klass.INDEX_TYPE,
                     default_field=klass.DEFAULT_FIELD,
                     fields=klass.FIELDS
             )
